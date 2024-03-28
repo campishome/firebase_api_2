@@ -1,20 +1,36 @@
 const express = require('express');
-require('dotenv').config()
-const uploadRoute = require('./controller/routeUpload');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-app.use(express.json());
 
+// Configure Multer to store uploaded files in memory
+const upload = multer({ storage: multer.memoryStorage() });
 
-//the route 
-app.use("/api/users" , uploadRoute);
+// Configure Cloudinary
+cloudinary.config({ 
+    cloud_name: 'dvr5khbjt', 
+    api_key: '931629694749851', 
+    api_secret: 'yKIcIjbORbf2X9-v6FbPXsrQrDA' 
+  });
 
+// Route for uploading image
+app.post('/upload', upload.single('image'), (req, res) => {
+  // Upload image to Cloudinary
+  cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Something went wrong' });
+    }
+    // Image uploaded successfully, return the result
+    res.json(result);
+  }).end(req.file.buffer);
+});
 
-//posrt connection 
-// app.listen(PORT, () => {
-//   console.log(`listening at http://localhost:${PORT}`);
-// });
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 module.exports = app;
-//cloudinary account:  https://cloudinary.com/signup
