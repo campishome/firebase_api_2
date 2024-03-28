@@ -12,8 +12,9 @@ app.use("/api/users" , uploadRoute);
 
 
 //posrt connection 
-app.listen(PORT, () => {
-  console.log(`listening at http://localhost:${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`listening at http://localhost:${PORT}`);
+// });
 
+module.exports = app;
 //cloudinary account:  https://cloudinary.com/signup
