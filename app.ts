@@ -19,42 +19,49 @@ const firebaseConfig = {
   };
   initializeApp(firebaseConfig);
 
-    const storage = getStorage();
-  
-    class FileMiddleware { 
-        filename = "";
-        //สร้าง object multer to save file in disk
-        public readonly diskLoader = multer({
-          //diskStorage = save to memory
-          storage: multer.memoryStorage(),
-          //limit file size to be uploaded
-          limits: {
-            fileSize: 67108864, // 64 MByte
-          },
-        });
-      }
-    
-      const fileupload = new FileMiddleware();
-      //use fileupload object to handle uploading file
-      app.post("/upload",fileupload.diskLoader.single("file"),async (req,res)=>{
-        //create filename
-        const filename = Math.round(Math.random() * 10000)+ ".png";
-        //set name to be saved on firebase storage
-        const storageRef = ref(storage,"images/" + filename);
-        //set detail of file to be uploaded
-        const metadata = {
-            contentType : req.file!.mimetype
-        }
-    
-        //upload to storage
-        const snapshot = await uploadBytesResumable(storageRef,req.file!.buffer,metadata)
-        
-        const dowloadUrl = await getDownloadURL(snapshot.ref);
-        res.json(
-                    { 
-                        filename: dowloadUrl 
-                    }
-                );
-      });
+  const storage = getStorage();
 
-module.exports = app
+  class FileMiddleware { 
+    // Use class properties instead of instance properties
+    // to avoid sharing state between requests
+    // Also, provide type definitions for properties
+    filename: string = "";
+  
+    // Create multer object to save file in memory
+    public readonly diskLoader = multer({
+      storage: multer.memoryStorage(),
+      limits: {
+        fileSize: 67108864, // 64 MB
+      },
+    });
+  }
+
+  const fileUpload = new FileMiddleware();
+
+app.post("/upload", fileUpload.diskLoader.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    // Generate a unique filename
+    const filename = Date.now() + '-' + req.file.originalname;
+    
+    const storageRef = ref(storage, "images/" + filename);
+    
+    const metadata = {
+      contentType : req.file.mimetype
+    };
+
+    const snapshot = await uploadBytesResumable(storageRef, req.file.buffer, metadata);
+    
+    const downloadUrl = await getDownloadURL(snapshot.ref);
+
+    res.json({ filename: downloadUrl });
+  } catch (error) {
+    console.error("Upload failed:", error);
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
+
+module.exports = app;
