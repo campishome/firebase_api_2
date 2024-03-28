@@ -15,4 +15,4 @@ app.use("/upload",upload);
 app.use("/uploads", express.static("uploads"));
 
 //---change if want to run as localhost
-// module.exports = app;
+module.exports = app;
