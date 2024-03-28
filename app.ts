@@ -36,7 +36,7 @@ const firebaseConfig = {
     
       const fileupload = new FileMiddleware();
       //use fileupload object to handle uploading file
-      app.post("/",fileupload.diskLoader.single("file"),async (req,res)=>{
+      app.post("/upload",fileupload.diskLoader.single("file"),async (req,res)=>{
         //create filename
         const filename = Math.round(Math.random() * 10000)+ ".png";
         //set name to be saved on firebase storage
@@ -56,5 +56,5 @@ const firebaseConfig = {
                     }
                 );
       });
-      
+
 module.exports = app
