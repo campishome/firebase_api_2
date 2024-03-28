@@ -1,8 +1,15 @@
 const express = require('express');
 const multer = require('multer');
+const cors = require("cors");
 const cloudinary = require('cloudinary').v2;
 
 const app = express();
+
+app.use(
+    cors({
+      origin: "*",
+    })
+);
 
 // Configure Multer to store uploaded files in memory
 const upload = multer({ storage: multer.memoryStorage() });
