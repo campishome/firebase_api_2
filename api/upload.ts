@@ -1,9 +1,8 @@
 import express from "express";
-export const router = express.Router();
 import multer from "multer";
 import { initializeApp } from "firebase/app";
-import { getStorage, ref ,getDownloadURL ,uploadBytesResumable} from "firebase/storage";
-
+export const router = express.Router();
+import { getStorage, ref ,getDownloadURL ,uploadBytesResumable} from "firebase/storage";//libraly ในการ upload
 const firebaseConfig = {
     apiKey: "AIzaSyAkbEK5_BnedDgbaaE3CIj6fpWhEtSZ_JU",
     authDomain: "project-upload-image-41825.firebaseapp.com",
@@ -12,50 +11,44 @@ const firebaseConfig = {
     messagingSenderId: "461983508516",
     appId: "1:461983508516:web:6edf86580aca37a0cf50b1"
   };
+
   initializeApp(firebaseConfig);
 
   const storage = getStorage();
 
   class FileMiddleware { 
-    // Use class properties instead of instance properties
-    // to avoid sharing state between requests
-    // Also, provide type definitions for properties
-    filename: string = "";
-  
-    // Create multer object to save file in memory
-    public readonly diskLoader = multer({
-      storage: multer.memoryStorage(),
-      limits: {
-        fileSize: 67108864, // 64 MB
-      },
-    });
-  }
-
-  const fileUpload = new FileMiddleware();
-
-router.post("/upload", fileUpload.diskLoader.single("file"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
+      filename = "";
+      //สร้าง object multer to save file in disk
+      public readonly diskLoader = multer({
+        //diskStorage = save to memory
+        storage: multer.memoryStorage(),
+        //limit file size to be uploaded
+        limits: {
+          fileSize: 67108864, // 64 MByte
+        },
+      });
     }
-
-    // Generate a unique filename
-    const filename = Date.now() + '-' + req.file.originalname;
-    
-    const storageRef = ref(storage, "images/" + filename);
-    
-    const metadata = {
-      contentType : req.file.mimetype
-    };
-
-    const snapshot = await uploadBytesResumable(storageRef, req.file.buffer, metadata);
-    
-    const downloadUrl = await getDownloadURL(snapshot.ref);
-
-    res.json({ filename: downloadUrl });
-  } catch (error) {
-    console.error("Upload failed:", error);
-    res.status(500).json({ error: "Upload failed" });
-  }
-});
-
+  
+    const fileupload = new FileMiddleware();
+    //use fileupload object to handle uploading file
+    router.post("/",fileupload.diskLoader.single("file"),async (req,res)=>{
+      //create filename
+      const filename = Math.round(Math.random() * 10000)+ ".png";
+      //set name to be saved on firebase storage
+      const storageRef = ref(storage,"images/" + filename);
+      //set detail of file to be uploaded
+      const metadata = {
+          contentType : req.file!.mimetype
+      }
+  
+      //upload to storage
+      const snapshot = await uploadBytesResumable(storageRef,req.file!.buffer,metadata)
+      
+      const dowloadUrl = await getDownloadURL(snapshot.ref);
+      res.json(
+                  { 
+                      filename: dowloadUrl 
+                  }
+              );
+    });
+  
