@@ -11,7 +11,8 @@ app.use(
   );
 
 app.use(bodyParser.json());
-app.use("/upload",upload);
+app.use("/upload", upload);
+
 app.use("/uploads", express.static("uploads"));
 
 //---change if want to run as localhost

@@ -1,6 +1,4 @@
 import express from "express";
-
-import multer from "multer";
 import path from "path";
 
 //create router of this api
@@ -32,6 +30,11 @@ export const router = express.Router();//libraly สำหรับทำ api , 
   
 //create obj from firebase storage
 const storage = getStorage();
+const multer = require('multer');
+
+const upload = multer({
+    dest: 'uploads/' // Destination folder for uploaded files (adjust as needed)
+});
 
 class FileMiddleware { 
     filename = "";
@@ -48,7 +51,7 @@ class FileMiddleware {
 
   const fileupload = new FileMiddleware();
   //use fileupload object to handle uploading file
-  router.post("/",fileupload.diskLoader.single("file"),async (req,res)=>{
+  router.post('/', upload.single('file'), async (req, res) => {
     //create filename
     const filename = Math.round(Math.random() * 10000)+ ".png";
     //set name to be saved on firebase storage
