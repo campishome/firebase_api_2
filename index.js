@@ -15,7 +15,12 @@ cloudinary.config({
 });
 
 // Route for uploading image
-app.post('/upload', upload.single('image'), (req, res) => {
+app.post('/upload', upload.single('file'), (req, res) => {
+  // Check if file exists
+  if (!req.file) {
+    return res.status(400).json({ error: 'Missing required parameter - file' });
+  }
+
   // Upload image to Cloudinary
   cloudinary.uploader.upload(req.file.path, { resource_type: 'image' }, (error, result) => {
     if (error) {
