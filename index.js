@@ -12,19 +12,19 @@ cloudinary.config({
     cloud_name: 'dvr5khbjt', 
     api_key: '931629694749851', 
     api_secret: 'yKIcIjbORbf2X9-v6FbPXsrQrDA' 
-  });
+});
 
 // Route for uploading image
 app.post('/upload', upload.single('image'), (req, res) => {
   // Upload image to Cloudinary
-  cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+  cloudinary.uploader.upload(req.file.path, { resource_type: 'image' }, (error, result) => {
     if (error) {
       console.error(error);
       return res.status(500).json({ error: 'Something went wrong' });
     }
-    // Image uploaded successfully, return the result
-    res.json(result);
-  }).end(req.file.buffer);
+    // Image uploaded successfully, return the URL
+    res.json({ imageUrl: result.secure_url });
+  });
 });
 
 // Start the server
